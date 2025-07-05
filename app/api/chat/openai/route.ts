@@ -14,8 +14,8 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
+      "Access-Control-Allow-Headers": "Content-Type"
+    }
   });
 }
 
@@ -45,18 +45,19 @@ export async function POST(request: Request) {
         chatSettings.model === "gpt-4-vision-preview" ||
         chatSettings.model === "gpt-4o"
           ? 4096
-          : null, // TODO: Fix
+          : null,
       stream: true
     })
 
     const stream = OpenAIStream(response)
 
-    // Add CORS header to streaming response
     return new StreamingTextResponse(stream, {
       headers: {
         "Access-Control-Allow-Origin": "*",
-      },
-    });
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
+    })
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
@@ -69,12 +70,13 @@ export async function POST(request: Request) {
         "OpenAI API Key is incorrect. Please fix it in your profile settings."
     }
 
-    // Add CORS header to error response
     return new Response(JSON.stringify({ message: errorMessage }), {
       status: errorCode,
       headers: {
         "Access-Control-Allow-Origin": "*",
-      },
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     })
   }
 }
