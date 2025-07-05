@@ -29,9 +29,9 @@ module.exports = withBundleAnalyzer(
       serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
     },
     i18n: {
-      locales: ['en', 'vi'], // Example locales (adjust as needed)
+      locales: ['en'], // Example locales (adjust as needed)
       defaultLocale: 'en',
     },
-    metadataBase: new URL('https://your-app-url.com'), // Replace with your actual app URL
+    metadataBase: new URL('https://chatbot-ui-gclm-5jugagmin-micheal1016s-projects.vercel.app'), // Replace with your actual app URL
   })
 )
