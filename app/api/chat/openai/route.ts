@@ -1,4 +1,3 @@
-import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import { ServerRuntime } from "next"
@@ -7,19 +6,17 @@ import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completion
 
 export const runtime: ServerRuntime = "edge"
 
-// --- CORS handler ---
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
-  });
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  })
 }
 
-// --- Main chat handler ---
 export async function POST(request: Request) {
   const json = await request.json()
   const { chatSettings, messages } = json as {
@@ -28,13 +25,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const profile = await getServerProfile()
-
-    checkApiKey(profile.openai_api_key, "OpenAI")
-
     const openai = new OpenAI({
-      apiKey: profile.openai_api_key || "",
-      organization: profile.openai_organization_id
+      apiKey: process.env.OPENAI_API_KEY || "",
+      // organization: process.env.OPENAI_ORG_ID || "", // optional
     })
 
     const response = await openai.chat.completions.create({
@@ -46,7 +39,7 @@ export async function POST(request: Request) {
         chatSettings.model === "gpt-4o"
           ? 4096
           : null,
-      stream: true
+      stream: true,
     })
 
     const stream = OpenAIStream(response)
@@ -54,9 +47,7 @@ export async function POST(request: Request) {
     return new StreamingTextResponse(stream, {
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
+      },
     })
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
@@ -64,19 +55,17 @@ export async function POST(request: Request) {
 
     if (errorMessage.toLowerCase().includes("api key not found")) {
       errorMessage =
-        "OpenAI API Key not found. Please set it in your profile settings."
+        "OpenAI API Key not found. Please set it in your environment variables."
     } else if (errorMessage.toLowerCase().includes("incorrect api key")) {
       errorMessage =
-        "OpenAI API Key is incorrect. Please fix it in your profile settings."
+        "OpenAI API Key is incorrect. Please fix it in your environment variables."
     }
 
     return new Response(JSON.stringify({ message: errorMessage }), {
       status: errorCode,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
+      },
     })
   }
 }
