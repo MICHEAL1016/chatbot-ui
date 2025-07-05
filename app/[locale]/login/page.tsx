@@ -33,6 +33,8 @@ export default async function Login({
   )
   const session = (await supabase.auth.getSession()).data.session
 
+  console.log("Session found:", session); // Debugging line
+
   if (session) {
     const { data: homeWorkspace, error } = await supabase
       .from("workspaces")
@@ -60,6 +62,9 @@ export default async function Login({
       email,
       password
     })
+
+    console.log("Sign in response:", data); // Debugging line
+    console.log("Sign in error:", error); // Debugging line
 
     if (error) {
       return redirect(`/login?message=${error.message}`)
@@ -107,6 +112,9 @@ export default async function Login({
     const emailWhitelist = emailWhitelistPatternsString?.trim()
       ? emailWhitelistPatternsString?.split(",")
       : []
+
+    console.log("Email domain whitelist:", emailDomainWhitelist); // Debugging line
+    console.log("Email whitelist:", emailWhitelist); // Debugging line
 
     // If there are whitelist patterns, check if the email is allowed to sign up
     if (emailDomainWhitelist.length > 0 || emailWhitelist.length > 0) {
@@ -219,3 +227,4 @@ export default async function Login({
     </div>
   )
 }
+
