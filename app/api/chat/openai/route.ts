@@ -7,6 +7,19 @@ import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completion
 
 export const runtime: ServerRuntime = "edge"
 
+// --- CORS handler ---
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
+// --- Main chat handler ---
 export async function POST(request: Request) {
   const json = await request.json()
   const { chatSettings, messages } = json as {
@@ -38,7 +51,12 @@ export async function POST(request: Request) {
 
     const stream = OpenAIStream(response)
 
-    return new StreamingTextResponse(stream)
+    // Add CORS header to streaming response
+    return new StreamingTextResponse(stream, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
@@ -51,8 +69,12 @@ export async function POST(request: Request) {
         "OpenAI API Key is incorrect. Please fix it in your profile settings."
     }
 
+    // Add CORS header to error response
     return new Response(JSON.stringify({ message: errorMessage }), {
-      status: errorCode
+      status: errorCode,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     })
   }
 }
