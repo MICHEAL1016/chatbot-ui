@@ -27,6 +27,11 @@ module.exports = withBundleAnalyzer(
     },
     experimental: {
       serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
-    }
+    },
+    i18n: {
+      locales: ['en', 'vi'], // Example locales (adjust as needed)
+      defaultLocale: 'en',
+    },
+    metadataBase: new URL('https://your-app-url.com'), // Replace with your actual app URL
   })
 )
